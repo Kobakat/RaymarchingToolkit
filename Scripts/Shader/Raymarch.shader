@@ -18,6 +18,7 @@
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
+            uniform sampler2D _CameraDepthTexture;
             uniform float4x4 _Frustum;
             uniform float4x4 _CamMatrix;
             uniform float4 _MainColor;
@@ -52,6 +53,8 @@
             {
                 float3 origin;
                 float3 direction;
+                float3 position;
+                float depth;
             };
 
             //Describes the distance from a sphere centered on P
@@ -91,19 +94,19 @@
                 for (int i = 0; i < maxSteps; i++)
                 {
                     //Determine the distance from the nearest shape in the scene
-                    float3 pos = r.origin + r.direction * dst;
-                    float surfDist = SurfaceDistance(pos);
+                    r.position = r.origin + r.direction * dst;
+                    float surfDist = SurfaceDistance(r.position);
 
-
+                    
                     //If the distance is sufficently small...
                     if (surfDist < epsilon)
                     {
                         //We "hit" the surface. Calculate the normal vector of the pixel and shade it based on the angle from the rays of light
-                        float3 n = CalculateNormal(pos);
+                        float3 n = CalculateNormal(r.position);
 
                         //This uses the lambertian model of lighting https://en.wikipedia.org/wiki/Lambertian_reflectance
-                        float l = dot(-_Light.xyz, n).rrr;
-
+                        float l = dot(-_Light.xyz, n);
+                        
 
                         //Color the pixel using the "color" control variable attached to the rendering camera as its base
                         pixelColor = fixed4(_MainColor.rgb * l, 1);
@@ -116,8 +119,8 @@
                     dst += surfDist;
 
 
-                    //If the distance is very large, we give up and break early
-                    if (dst > maxDist)
+                    //If the distance is very large or the camera renders a standard polygonal mesh first we give up and break early
+                    if (dst > maxDist || dst >= r.depth)
                         break;
                 }
 
@@ -153,6 +156,9 @@
                 ray r;
                 r.direction = normalize(i.ray.xyz);
                 r.origin = _WorldSpaceCameraPos;
+
+                r.depth = LinearEyeDepth(tex2D(_CameraDepthTexture, i.uv).r);
+                r.depth *= length(i.ray.xyz);
 
                 //Previous scene view color
                 fixed3 base = tex2D(_MainTex, i.uv);

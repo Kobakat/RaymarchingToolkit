@@ -29,7 +29,11 @@ public class RaymarchControl : MonoBehaviour
         get
         {
             if (!_cam)
+            {
                 _cam = GetComponent<Camera>();
+                _cam.depthTextureMode = DepthTextureMode.Depth;
+            }
+                
             return _cam;
         }
     }
