@@ -16,6 +16,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+            #include "SignedDistanceFunctions.cginc"
 
             sampler2D _MainTex;
             uniform sampler2D _CameraDepthTexture;
@@ -57,11 +58,6 @@
                 float depth;
             };
 
-            //Describes the distance from a sphere centered on P
-            float sdSphere(float3 p, float r)
-            {
-                return length(p) - r;
-            }
 
             //Returns the distance to the raymarched shapes surface
             float SurfaceDistance(float3 p)
