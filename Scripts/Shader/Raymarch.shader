@@ -20,8 +20,8 @@
             sampler2D _MainTex;
             uniform float4x4 _Frustum;
             uniform float4x4 _CamMatrix;
-            uniform float4x4 _MainColor;
-
+            uniform float4 _MainColor;
+            uniform float3 _Light;
 
             //How many times each ray is marched
             //Higher values give higher resolution (and potentially longer draw distances) but lower performance
@@ -66,6 +66,18 @@
                 return(sdSphere(p, 1));
             }
 
+            //For a signed distances field, the normal of any given point is defined as the gradient of the distance field
+            //As such, subtracting the distance field of a slight smaller value by a slight large value produces a good approximation
+            //This function is exceptionally expensive as it requires 6 more calls of a sign distance function PER PIXEL hit
+            float3 CalculateNormal(float3 p)
+            {
+
+                float x = SurfaceDistance(float3(p.x + epsilon, p.y, p.z)) - SurfaceDistance(float3(p.x - epsilon, p.y, p.z));
+                float y = SurfaceDistance(float3(p.x, p.y + epsilon, p.z)) - SurfaceDistance(float3(p.x, p.y - epsilon, p.z));
+                float z = SurfaceDistance(float3(p.x, p.y, p.z + epsilon)) - SurfaceDistance(float3(p.x, p.y, p.z - epsilon));
+
+                return normalize(float3(x, y, z));
+            }
 
             //For each pixel on the screen
             fixed4 raymarch(ray r)
@@ -86,8 +98,15 @@
                     //If the distance is sufficently small...
                     if (surfDist < epsilon)
                     {
-                        //We "hit" the surface. Color the pixel.
-                        pixelColor = fixed4(1, 1, 1, 1);
+                        //We "hit" the surface. Calculate the normal vector of the pixel and shade it based on the angle from the rays of light
+                        float3 n = CalculateNormal(pos);
+
+                        //This uses the lambertian model of lighting https://en.wikipedia.org/wiki/Lambertian_reflectance
+                        float l = dot(-_Light.xyz, n).rrr;
+
+
+                        //Color the pixel using the "color" control variable attached to the rendering camera as its base
+                        pixelColor = fixed4(_MainColor.rgb * l, 1);
 
                         break;
                     }
@@ -129,16 +148,21 @@
 
             fixed4 frag(v2f i) : SV_Target
             {
-                //Simply color all pixels that hit the surface white
-                //This creates a plain white circle
+                //Blend the new rendered images with the previous scene view
 
                 ray r;
                 r.direction = normalize(i.ray.xyz);
                 r.origin = _WorldSpaceCameraPos;
 
+                //Previous scene view color
+                fixed3 base = tex2D(_MainTex, i.uv);
+                
+                //New color obtained from raymarching
                 fixed4 col = raymarch(r);
 
-                return col;
+                //Alpha Blend
+                return fixed4(base * (1.0 - col.w) + col.xyz * col.w, 1.0);
+
             }
 
             ENDCG

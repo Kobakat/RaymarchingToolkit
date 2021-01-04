@@ -8,10 +8,11 @@ public class RaymarchControl : MonoBehaviour
 {
     public Color color;
 
-    [SerializeField] Shader shader;
+    [SerializeField] Shader shader = null;
 
     Material _material;
     Camera _cam;
+    Transform _light;
 
     public Material Material
     {
@@ -23,7 +24,6 @@ public class RaymarchControl : MonoBehaviour
         }
     }
 
-
     public Camera Cam
     {
         get
@@ -31,6 +31,28 @@ public class RaymarchControl : MonoBehaviour
             if (!_cam)
                 _cam = GetComponent<Camera>();
             return _cam;
+        }
+    }
+
+    public Transform Light
+    {
+        get
+        {
+            Light l;
+
+            if (!_light)
+            {
+                l = (Light)FindObjectOfType(typeof(Light));
+
+                if (!l)
+                {
+                    return _light;
+                }
+
+                _light = l.transform;
+            }
+
+            return _light;
         }
     }
 
@@ -66,7 +88,7 @@ public class RaymarchControl : MonoBehaviour
         GL.PopMatrix();
     }
 
-    //Passing values to GPU
+
     [ImageEffectOpaque]
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
@@ -79,6 +101,7 @@ public class RaymarchControl : MonoBehaviour
         Material.SetMatrix("_Frustum", GetFrustum(Cam));
         Material.SetMatrix("_CamMatrix", Cam.cameraToWorldMatrix);
         Material.SetColor("_MainColor", color);
+        Material.SetVector("_Light", Light ? Light.forward : Vector3.down);
 
         Blit(source, destination, Material, 0);
     }
