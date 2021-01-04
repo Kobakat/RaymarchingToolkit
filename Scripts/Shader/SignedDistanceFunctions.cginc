@@ -1,7 +1,7 @@
 ///Header file for raymarching shader.
-///Includes signed distance functions
+///Includes operation functions
 ///
-///All SDF functions are provided by Inigo Quilez
+///All operation functions are provided by Inigo Quilez
 ///from his website https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
 
