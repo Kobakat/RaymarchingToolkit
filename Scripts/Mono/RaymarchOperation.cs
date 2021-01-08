@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [ExecuteInEditMode]
-public class Operation : MonoBehaviour
+public class RaymarchOperation : MonoBehaviour
 {
     public enum OpFunction
     {
