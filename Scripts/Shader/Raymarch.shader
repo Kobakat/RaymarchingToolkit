@@ -17,6 +17,9 @@
 
             #include "UnityCG.cginc"
             #include "SignedDistanceFunctions.cginc"
+            #include "OperationFunctions.cginc"
+            #include "LightingFunctions.cginc"
+            #include "FilterFunctions.cginc"
 
             sampler2D _MainTex;
             uniform sampler2D _CameraDepthTexture;
