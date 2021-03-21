@@ -1,6 +1,6 @@
 # Raymarching Toolkit
 
-This toolkit is a personal project I worked on to hone my skills in 3D graphics and real-time rendering. It is a Unity package that enables real-time rendering of volumetric shapes in the unity editor.
+This toolkit is a personal project I worked on to hone my skills in 3D graphics and real-time rendering. It is a Unity package that lets you experiment with volumetric shapes in the unity editor.
 
 Users are able to dynamically add primitive volumetric shapes to scenes and perform common operations on them such as subtraction, intersection, and blending. Included is a custom inspector to neatly present values to individual shapes, operations, and the raymarching control itself. In addition, the toolkit enables user to add additional functionality (shapes, operations, filters) with little interaction with pre-existing code.
 
